@@ -71,7 +71,9 @@ class Constraint():
 
             constr = self.eval_con(x_perturb)
 
-            Jacobian[j][i] = [(constr[j] - constr0[j])/EPS for j in range(num_constr)]
+
+            for j in range(num_constr):
+                Jacobian[j][i] = (constr[j] - constr0[j])/EPS 
             
         return Jacobian
 
