@@ -25,19 +25,20 @@ class Solution():
         while queue and i < n_results:
             cur = queue.popleft()
             constr = con.eval_con(cur)
-            constr_grad = con.eval_grad(cur)
+            # constr_grad = con.eval_grad(cur)
 
 
             if con.apply(cur) and cur not in out:
                 out.append(cur)
                 i += 1
 
-            new_x_candidates = self.span_cube(cur, population, constr_grad)
+            new_x_candidates = self.span_cube(cur, population, 0)
             
 
             for new_x in new_x_candidates:
-               
+                # print new_x
                 if con.apply(new_x):
+
                     queue.append([float('%.4f'%item) for item in new_x]);    
                     # queue.append(["%.4f"%item for item in new_x]);    
 
@@ -46,14 +47,14 @@ class Solution():
 
         return out
 
-    def span_cube(self, x, population, constr_grad):
+    def span_cube(self, x, population, constr_grad=0):
         """
         Generate random vectors, 
         """
 
         num_x = len(x)
         num_candidates = 2**num_x
-        num_constr = len(constr_grad)
+        # num_constr = len(constr_grad)
 
         out = []
         i = 0
@@ -62,20 +63,20 @@ class Solution():
             rand = random.sample(population, num_x)
 
             # check for dc * dx >= 0? This will slow down the process; but let's see
-            dcdx = [0]*num_constr
-            for i_con in range(num_constr):
+            # dcdx = [0]*num_constr
+            # for i_con in range(num_constr):
 
-                dcdx[i_con] = sum([constr_grad[i_con][j]*rand[j] for j in range(num_x)])
-                # new_constr[i_con] = constr[i_con] + temp
+            #     dcdx[i_con] = sum([constr_grad[i_con][j]*rand[j] for j in range(num_x)])
+            #     # new_constr[i_con] = constr[i_con] + temp
 
-                if dcdx[i_con] < 0:
-                    break
+            #     if dcdx[i_con] < 0:
+            #         break
 
-            if i_con != num_constr - 1:
-                continue  
+            # if i_con != num_constr - 1:
+            #    continue  
 
             new_x = [round(x[j]+rand[j], 4) for j in range(num_x)]
-            if all( 0 <= xi <= 1.0 for xi in new_x):
+            if all( 0 < xi <= 1.0 for xi in new_x):
                 out.append(new_x)
                 i += 1
 
@@ -85,9 +86,9 @@ class Solution():
 
 if __name__ == "__main__":
     
-    fname = 'mixture.txt'
+    # fname = 'mixture.txt'
     # fname = 'example.txt'
-    # fname = 'formulation.txt'
+    fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
@@ -95,6 +96,8 @@ if __name__ == "__main__":
 
     out_vectors = Solution().getVector(con)
 
+    # for item in out_vectors:
+    #     print con.apply(item)
 
     outfile = 'output_' + fname
     
@@ -105,7 +108,3 @@ if __name__ == "__main__":
             item_str2 = item_str.replace(',', ' ')
             f.write("%s\n" % item_str2)
 
-
-    # norm_x = math.sqrt(sum([x[i]**2 for i in range(num_x)]))
-    # norm_x = max(1e-3, norm_x)
-    # increment = norm_x
