@@ -3,12 +3,12 @@ import sys, copy, math, random, pdb
 from collections import deque
 from constraints import Constraint
 
+
 class Solution():
 
-    def getVector(self, con, n_results=10):
+    def getVector(self, con, n_results=1000):
 
         x = con.example
-        # grad_x = con.eval_grad(x)
         num_x = con.n_dim
 
         out = []
@@ -16,64 +16,78 @@ class Solution():
         queue.append(x)
 
         
-        # norm_x = math.sqrt(sum([x[i]**2 for i in range(num_x)]))
-        # norm_x = max(1e-3, norm_x)
-        # increment = norm_x
-        pool_dim = 100
+        pool_dim = 1000
         popu = range(1, pool_dim+1)
-        population = [popu[i]*1.0/pool_dim for i in range(pool_dim)]
+        population = [popu[i]*2.0/pool_dim - 1.0 for i in range(pool_dim)]
+        population = list(map(lambda x: round(x, 4), population))
 
         i = 0
         while queue and i < n_results:
             cur = queue.popleft()
+            constr = con.eval_con(cur)
+            constr_grad = con.eval_grad(cur)
 
-            print i
 
             if con.apply(cur) and cur not in out:
                 out.append(cur)
                 i += 1
 
-            constr = con.eval_con(cur)
-            constr_grad = con.eval_grad(cur)
+            new_x_candidates = self.span_cube(cur, population, constr_grad)
+            
 
-            # new_x = []
+            for new_x in new_x_candidates:
+               
+                if con.apply(new_x):
+                    queue.append([float('%.4f'%item) for item in new_x]);    
+                    # queue.append(["%.4f"%item for item in new_x]);    
 
-            idx_rdm = 0
-
-            while idx_rdm < num_x:
-                random_dx = random.sample(population, num_x)
-
-                # new_constr = [0]*len(constr)
-                # constr + constr_grad * dx >= 0 ? 
-
-                dCdx = [0]*len(constr)
-                for i_con in range(len(constr)):
-
-                    dCdx[i_con] = sum([constr_grad[i_con][j]*random_dx[j] for j in range(num_x)])
-                    # new_constr[i_con] = constr[i_con] + temp
-
-                    if dCdx[i_con] < 0:
-                        break
-
-                if i_con != len(constr)-1:
-                    continue
-
-                for idx_radius in range(1, 11):
-                    new_x = [x[j] + idx_radius * random_dx[j] for j in range(num_x)]
-                    queue.append(new_x)
-
-                idx_rdm += 1
-
-            print new_x
+            # print new_x
 
 
         return out
+
+    def span_cube(self, x, population, constr_grad):
+        """
+        Generate random vectors, 
+        """
+
+        num_x = len(x)
+        num_candidates = 2**num_x
+        num_constr = len(constr_grad)
+
+        out = []
+        i = 0
+
+        while i < num_candidates:
+            rand = random.sample(population, num_x)
+
+            # check for dc * dx >= 0? This will slow down the process; but let's see
+            dcdx = [0]*num_constr
+            for i_con in range(num_constr):
+
+                dcdx[i_con] = sum([constr_grad[i_con][j]*rand[j] for j in range(num_x)])
+                # new_constr[i_con] = constr[i_con] + temp
+
+                if dcdx[i_con] < 0:
+                    break
+
+            if i_con != num_constr - 1:
+                continue  
+
+            new_x = [round(x[j]+rand[j], 4) for j in range(num_x)]
+            if all( 0 <= xi <= 1.0 for xi in new_x):
+                out.append(new_x)
+                i += 1
+
+        return out
+        
 
 
 if __name__ == "__main__":
     
     fname = 'mixture.txt'
     # fname = 'example.txt'
+    # fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
@@ -92,3 +106,6 @@ if __name__ == "__main__":
             f.write("%s\n" % item_str2)
 
 
+    # norm_x = math.sqrt(sum([x[i]**2 for i in range(num_x)]))
+    # norm_x = max(1e-3, norm_x)
+    # increment = norm_x
