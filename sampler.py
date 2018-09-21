@@ -36,11 +36,14 @@ class Solution():
             constr = con.eval_con(cur)
             constr_grad = con.eval_grad(cur)
 
-            new_x = []
-            while 1:
+            # new_x = []
+
+            idx_rdm = 0
+
+            while idx_rdm < num_x:
                 random_dx = random.sample(population, num_x)
 
-                new_constr = [0]*len(constr)
+                # new_constr = [0]*len(constr)
                 # constr + constr_grad * dx >= 0 ? 
 
                 dCdx = [0]*len(constr)
@@ -55,13 +58,11 @@ class Solution():
                 if i_con != len(constr)-1:
                     continue
 
-                new_x = [x[j] + random_dx[j] for j in range(num_x)]
-                queue.append(new_x)
+                for idx_radius in range(1, 11):
+                    new_x = [x[j] + idx_radius * random_dx[j] for j in range(num_x)]
+                    queue.append(new_x)
 
-                if new_x:
-                    break
-
-                print new_x
+                idx_rdm += 1
 
             print new_x
 
@@ -71,21 +72,23 @@ class Solution():
 
 if __name__ == "__main__":
     
-    # fname = 'mixture.txt'
-    fname = 'example.txt'
+    fname = 'mixture.txt'
+    # fname = 'example.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
     con = Constraint(fname)
 
-    out = Solution().getVector(con)
-
-    print out
+    out_vectors = Solution().getVector(con)
 
 
-
+    outfile = 'output_' + fname
     
 
-
+    with open(outfile, 'w') as f:
+        for item in out_vectors:
+            item_str = str(item)[1:-1]
+            item_str2 = item_str.replace(',', ' ')
+            f.write("%s\n" % item_str2)
 
 
