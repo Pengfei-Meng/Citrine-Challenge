@@ -2,6 +2,7 @@
 import sys, copy, math, random, pdb
 from collections import deque
 from constraints import Constraint
+import numpy as np
 
 
 class Solution():
@@ -15,29 +16,30 @@ class Solution():
         queue = deque()
         queue.append(x)
 
-        
-        pool_dim = 10000
-        popu = range(1, pool_dim+1)
-        population = [popu[i]*2.0/pool_dim - 1.0 for i in range(pool_dim)]
-        population = list(map(lambda x: round(x, 4), population))
-
         i = 0
         while queue and i < n_results:
             cur = queue.popleft()
-            constr = con.eval_con(cur)
+            # constr = con.eval_con(cur)
             # constr_grad = con.eval_grad(cur)
 
+            # pdb.set_trace()
             if con.apply(cur) and cur not in out:
                 out.append(cur)
+                print cur
                 i += 1
 
-            new_x_candidates = self.span_cube(cur, population, 0)
+            left_dist = np.array(cur)
+            right_dist = np.ones(num_x) - np.array(cur)
+            cov = np.diag(np.square( (left_dist + right_dist)/2 ))
             
-            
-            for new_x in new_x_candidates:
-                if con.apply(new_x):
-                    queue.append([float('%.4f'%item) for item in new_x]);    
-
+            ii = 0
+            while ii < 2**num_x:
+                new_x = np.random.multivariate_normal(np.array(cur), cov, 1).flatten()
+                # pdb.set_trace()
+                if all(new_x >= 0) and all(new_x <= 1.0) and con.apply(new_x.tolist()):
+                    queue.append(new_x.tolist());    
+                    ii += 1
+                # √  csaprint ii
 
         return out
 
@@ -82,8 +84,8 @@ class Solution():
 if __name__ == "__main__":
     
     # fname = 'mixture.txt'
-    fname = 'example.txt'
-    # fname = 'formulation.txt'
+    # fname = 'example.txt'
+    fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
