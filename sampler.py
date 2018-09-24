@@ -16,7 +16,7 @@ class Solution():
         queue.append(x)
 
         
-        pool_dim = 1000
+        pool_dim = 10000
         popu = range(1, pool_dim+1)
         population = [popu[i]*2.0/pool_dim - 1.0 for i in range(pool_dim)]
         population = list(map(lambda x: round(x, 4), population))
@@ -27,22 +27,16 @@ class Solution():
             constr = con.eval_con(cur)
             # constr_grad = con.eval_grad(cur)
 
-
             if con.apply(cur) and cur not in out:
                 out.append(cur)
                 i += 1
 
             new_x_candidates = self.span_cube(cur, population, 0)
             
-
+            
             for new_x in new_x_candidates:
-                # print new_x
                 if con.apply(new_x):
-
                     queue.append([float('%.4f'%item) for item in new_x]);    
-                    # queue.append(["%.4f"%item for item in new_x]);    
-
-            # print new_x
 
 
         return out
@@ -62,7 +56,7 @@ class Solution():
         while i < num_candidates:
             rand = random.sample(population, num_x)
 
-            # check for dc * dx >= 0? This will slow down the process; but let's see
+            # # check for dc * dx >= 0? This will slow down the process; but let's see
             # dcdx = [0]*num_constr
             # for i_con in range(num_constr):
 
@@ -75,7 +69,8 @@ class Solution():
             # if i_con != num_constr - 1:
             #    continue  
 
-            new_x = [round(x[j]+rand[j], 4) for j in range(num_x)]
+            # new_x = [round(x[j]+rand[j], 4) for j in range(num_x)]
+            new_x = [round(rand[j], 4) for j in range(num_x)]
             if all( 0 < xi <= 1.0 for xi in new_x):
                 out.append(new_x)
                 i += 1
@@ -87,8 +82,8 @@ class Solution():
 if __name__ == "__main__":
     
     # fname = 'mixture.txt'
-    # fname = 'example.txt'
-    fname = 'formulation.txt'
+    fname = 'example.txt'
+    # fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
