@@ -57,15 +57,19 @@ class Solution():
             active_grad = constr_grad[active_idx[0], :]
             cov = np.diag(np.ones(num_x)/2)  
 
-            ii = 0
-            while ii < num_candidates:
-                dx = np.random.multivariate_normal(np.array(x), cov, 1).flatten()
-                new_x = x + dx
+
+            dx_all = np.random.multivariate_normal(np.array(cur), cov, 1000)
+
+            # pdb.set_trace()
+
+            # ii = 0
+            for dx in dx_all:
+                new_x = cur + dx
                 
                 dcdx = np.dot(active_grad, dx)
                 if all(new_x >= 0) and all(new_x <= 1.0) and all(dcdx >= 0) and con.apply(new_x.tolist()):
                     queue.append(new_x.tolist());   
-                    ii += 1  
+                    # ii += 1  
 
             # ---------------------------------------------------------
 
@@ -96,8 +100,8 @@ class Solution():
 if __name__ == "__main__":
     
     # fname = 'mixture.txt'
-    fname = 'example.txt'
-    # fname = 'formulation.txt'
+    # fname = 'example.txt'
+    fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
