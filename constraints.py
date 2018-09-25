@@ -1,4 +1,6 @@
-import copy
+import copy, pdb
+import numpy as np
+
 
 class Constraint():
     """Constraints loaded from a file."""
@@ -52,28 +54,33 @@ class Constraint():
         out = []
         for expr in self.exprs_val:
             out.append(eval(expr))
-        return out 
+
+        non_bound = np.array(out)
+        lower = np.array(x) 
+        upper = np.ones(len(x)) -  np.array(x)
+
+        pdb.set_trace()
+        return np.array(out) 
 
 
-    def eval_grad(self, x):
+    def eval_grad(self, xin):
 
-        constr0 = self.eval_con(x)
+        constr0 = self.eval_con(xin)
+        x = np.array(xin)
         num_constr = len(constr0)
         EPS = 1e-7
 
-        Jacobian = [[0]*self.n_dim for _ in range(num_constr)]
+        Jacobian = np.zeros(shape=(num_constr, self.n_dim))
 
         for i in range(self.n_dim):
             x_perturb = copy.deepcopy(x)
 
             dx = EPS if x[i] == 0.0 else x[i]*EPS
-            x_perturb[i] = x[i] + dx
+            x_perturb[i] += dx
 
-            constr = self.eval_con(x_perturb)
+            constr = self.eval_con(x_perturb.tolist())
 
-
-            for j in range(num_constr):
-                Jacobian[j][i] = (constr[j] - constr0[j])/EPS 
+            Jacobian[:, i] = (constr - constr0)/EPS 
             
         return Jacobian
 

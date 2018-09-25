@@ -4,8 +4,6 @@ from collections import deque
 from constraints import Constraint
 import numpy as np
 import time
-# from timeit import default_timer as timer
-
 
 class Solution():
 
@@ -50,26 +48,37 @@ class Solution():
             print 't2: ', t2-t1
 
 
-            num_candidates = 2**num_x
-           
-            # ----------  self.candidates()  function here  -----------
+            num_candidates = 1000 # 2**num_x
+            
+            # ----------  Generating candidates here  -----------
             active_idx = np.where(constr==0)
             active_grad = constr_grad[active_idx[0], :]
-            cov = np.diag(np.ones(num_x)/2)  
+            active_num = len(active_grad)
+
+            cov = np.diag(np.ones(num_x)/2)       
+
+            ii = 0
+            while ii < 2**num_x:
+                if active_num > 0:
+                    # d_alpha = np.random.multivariate_normal(np.array(cur), cov, num_candidates)
+                    d_alpha = np.random.random_sample((num_candidates, len(constr)))/5
+                    dx_all_1 = np.dot(d_alpha[:, active_idx[0]], active_grad)
+                    null_active = self.null_space(active_grad)
+                    
+                    dx_all_2 = np.dot(d_alpha, null_active)
+                    dx_all = dx_all_1 + dx_all_2
+                    # pdb.set_trace()
+
+                else:
+                    dx_all = np.random.multivariate_normal(np.array(cur), cov, num_candidates)
 
 
-            dx_all = np.random.multivariate_normal(np.array(cur), cov, 1000)
-
-            # pdb.set_trace()
-
-            # ii = 0
-            for dx in dx_all:
-                new_x = cur + dx
-                
-                dcdx = np.dot(active_grad, dx)
-                if all(new_x >= 0) and all(new_x <= 1.0) and all(dcdx >= 0) and con.apply(new_x.tolist()):
-                    queue.append(new_x.tolist());   
-                    # ii += 1  
+                for dx in dx_all:
+                    new_x = np.array(cur) + dx
+                    
+                    if all(new_x >= 0) and all(new_x <= 1.0) and con.apply(new_x.tolist()):
+                        queue.append(new_x.tolist());
+                        ii += 1    
 
             # ---------------------------------------------------------
 
@@ -93,15 +102,15 @@ class Solution():
         nrow = t_U_A.shape[0]
         left_null_A = t_U_A[rank:nrow,:]
         
-        return left_null_A
+        return np.squeeze(np.asarray(left_null_A))
         
 
 
 if __name__ == "__main__":
     
     # fname = 'mixture.txt'
-    # fname = 'example.txt'
-    fname = 'formulation.txt'
+    fname = 'example.txt'
+    # fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
