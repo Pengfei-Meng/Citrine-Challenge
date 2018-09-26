@@ -58,9 +58,8 @@ class Constraint():
         non_bound = np.array(out)
         lower = np.array(x) 
         upper = np.ones(len(x)) -  np.array(x)
-
-        pdb.set_trace()
-        return np.array(out) 
+        
+        return np.concatenate((np.concatenate((lower, upper)), non_bound))
 
 
     def eval_grad(self, xin):
@@ -68,9 +67,14 @@ class Constraint():
         constr0 = self.eval_con(xin)
         x = np.array(xin)
         num_constr = len(constr0)
+        num_x = len(xin)
+
         EPS = 1e-7
 
         Jacobian = np.zeros(shape=(num_constr, self.n_dim))
+        Jacobian[:num_x,:] = np.eye(num_x)
+        Jacobian[num_x:2*num_x,:] = -np.eye(num_x)
+
 
         for i in range(self.n_dim):
             x_perturb = copy.deepcopy(x)
@@ -80,7 +84,7 @@ class Constraint():
 
             constr = self.eval_con(x_perturb.tolist())
 
-            Jacobian[:, i] = (constr - constr0)/EPS 
+            Jacobian[2*num_x:, i] = (constr[2*num_x:] - constr0[2*num_x:])/EPS 
             
         return Jacobian
 
