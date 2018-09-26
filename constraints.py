@@ -56,10 +56,11 @@ class Constraint():
             out.append(eval(expr))
 
         non_bound = np.array(out)
-        lower = np.array(x) 
-        upper = np.ones(len(x)) -  np.array(x)
+        # lower = np.array(x) 
+        # upper = np.ones(len(x)) -  np.array(x)
         
-        return np.concatenate((np.concatenate((lower, upper)), non_bound))
+        # return np.concatenate((np.concatenate((lower, upper)), non_bound))
+        return non_bound
 
 
     def eval_grad(self, xin):
