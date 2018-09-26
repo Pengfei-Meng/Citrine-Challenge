@@ -32,9 +32,12 @@ class Solution():
             constr = con.eval_con(cur)
             constr_grad = con.eval_grad(cur)
 
-            # t1 = time.time() 
-            # print 't1: ', t1-t0
+            constr_lb = constr[:num_x]
+            constr_ub = constr[num_x:2*num_x]
 
+            # cov = np.diag(np.square( (constr_lb + constr_ub)/4 ))
+            cov = np.diag(np.ones(num_x)/2) 
+            
             if con.apply(cur) and cur not in out:
                 out.append(cur)
                 i += 1
@@ -45,7 +48,7 @@ class Solution():
                     f.write("%s\n" % item_str2)     
                 
             # t2 = time.time() 
-            # print 't2: ', t2-t1
+            # print 't2: ', t2-t0
 
 
             num_candidates = 1000 # 2**num_x
@@ -55,13 +58,14 @@ class Solution():
             active_grad = constr_grad[active_idx[0], :]
             active_num = len(active_grad)
             
+            # pdb.set_trace()
+            # print 'active constraints: ', active_num
 
-            cov = np.diag(np.ones(num_x)/2)       
+
 
             ii = 0
             while ii < 2**num_x:
                 if active_num > 0:
-
 
                     null_active = self.null_space(active_grad)
                     nonactive_num = null_active.shape[0]
@@ -69,15 +73,11 @@ class Solution():
                     d_alpha = np.random.random_sample((num_candidates, active_num))/2
                     dx_all = np.dot(d_alpha, active_grad)
                     
-
-                    
                     if nonactive_num > 0:
                         d_alpha2 = np.random.multivariate_normal(np.zeros(nonactive_num), np.diag(np.ones(nonactive_num)/2), num_candidates)
                         dx_all_2 = np.dot(d_alpha2, null_active)
                         dx_all = dx_all + dx_all_2
                 
-                    
-
                 else:
                     dx_all = np.random.multivariate_normal(np.array(cur), cov, num_candidates)
 
@@ -117,9 +117,9 @@ class Solution():
 
 if __name__ == "__main__":
     
-    fname = 'mixture.txt'
+    # fname = 'mixture.txt'
     # fname = 'example.txt'
-    # fname = 'formulation.txt'
+    fname = 'formulation.txt'
     # fname = 'alloy.txt'
     # fname = sys.argv[1]
 
@@ -128,6 +128,16 @@ if __name__ == "__main__":
     Solution().getVector(fname)
 
     end = time.time()
-    print 'Total runtime: ', end-start
+    duration = end-start
+
+    outfile = 'output_' + fname
+    with open(outfile, 'a') as f:
+        f.write("==================\n") 
+        f.write("Elapsed time in seconds: " + "%s\n" % duration) 
+
+    print 'Completed.'
+
+
+
 
 
