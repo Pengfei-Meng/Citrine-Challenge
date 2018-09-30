@@ -15,6 +15,9 @@
 
     4) If still not working, please contact pengfei.meng.6@gmail.com. 
 
+    5) An optional plotting function is added to show the distribution of the solutions. To use it, Matplotlib need to be installed. Simply add True at the end of the command:
+        e.g. ./sampler mixture.txt  output_mixture.txt  1000  True
+
 
 2. Brief explanation of the solution: 
 
