@@ -30,8 +30,6 @@ subject to:  as defined in the input file
 
 Inside the supporting python class "constraints.py", a class funciton is added that output the values of the constraints and is used heavily. Another function computing the constraint gradients using finite difference is also added but not used. 
 
-Note: for the "alloy.txt", the solution points seem clustered around certain points. 
-It could be because it subjects to only bound constraints, and the ranges are very tight. In particular, the scale of the feasible box are in the order of 1e-4 to 1e-1. So ill-conditioning could be an issue.  
 
 
 3. Brief explanation of past attempts: 
